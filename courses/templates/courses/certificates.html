@@ -1,0 +1,115 @@
+{% extends 'courses/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">🎓 My Certificates</h1>
+            
+            {% if completions %}
+                <div class="row">
+                    {% for completion in completions %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card certificate-card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">{{ completion.video_id }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Completed:</strong> {{ completion.completed_at|date:"F j, Y" }}</p>
+                                <p><strong>Certificate ID:</strong> <code>{{ completion.id }}</code></p>
+                                <p class="text-muted">{{ completion.completed_at|timesince }} ago</p>
+                            </div>
+                            <div class="card-footer bg-light">
+                                <a href="{% url 'view_certificate' completion.id %}" class="btn btn-info btn-sm">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <a href="{% url 'download_certificate' completion.id %}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                                <button class="btn btn-secondary btn-sm" onclick="copyCertLink({{ completion.id }})">
+                                    <i class="fas fa-share"></i> Share
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <h5>No certificates yet!</h5>
+                    <p>Complete a video tutorial to earn your first certificate.</p>
+                    <a href="{% url 'courses' %}" class="btn btn-primary">Start Learning</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Share Certificate</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Copy the link below to share your certificate:</p>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="shareLink" readonly>
+                    <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard()">Copy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .certificate-card {
+        transition: transform 0.2s;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .certificate-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .card-footer {
+        display: flex;
+        gap: 8px;
+    }
+    
+    code {
+        background-color: #f5f5f5;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+    }
+</style>
+
+<script>
+function copyCertLink(certId) {
+    const link = window.location.origin + `/certificate/${certId}/view/`;
+    document.getElementById('shareLink').value = link;
+    
+    const shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
+    shareModal.show();
+}
+
+function copyToClipboard() {
+    const shareLink = document.getElementById('shareLink');
+    shareLink.select();
+    document.execCommand('copy');
+    
+    // Show feedback
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => {
+        btn.textContent = originalText;
+    }, 2000);
+}
+</script>
+{% endblock %}

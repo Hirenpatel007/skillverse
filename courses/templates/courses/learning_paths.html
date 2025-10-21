@@ -1,0 +1,38 @@
+{% extends 'courses/base.html' %}
+
+{% block title %}Learning Paths - SkillVerse{% endblock %}
+
+{% block extra_style %}
+<style>
+    .path-card { background: white; padding: 25px; border-radius: 12px; margin-bottom: 20px; }
+    .path-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px; }
+    .ai-badge { background: #fef3c7; color: #d97706; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 style="margin-bottom: 30px;">🎯 My Learning Paths</h1>
+    
+    {% for path in paths %}
+    <div class="path-card">
+        <div class="path-header">
+            <div>
+                <h3>{{ path.title }}</h3>
+                {% if path.ai_generated %}
+                <span class="ai-badge">🧠 AI Generated</span>
+                {% endif %}
+            </div>
+        </div>
+        <p style="color: #718096; margin-bottom: 15px;">{{ path.description }}</p>
+        <p><strong>Courses:</strong> {{ path.courses.count }}</p>
+    </div>
+    {% empty %}
+    <div style="text-align: center; padding: 60px; color: #a0aec0;">
+        <div style="font-size: 64px; margin-bottom: 20px;">🎯</div>
+        <h3>No learning paths yet</h3>
+        <p>AI will generate personalized paths based on your goals</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

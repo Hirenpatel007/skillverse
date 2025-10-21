@@ -1,0 +1,481 @@
+{% extends 'courses/base.html' %}
+{% load static %}
+
+{% block extra_style %}
+<style>
+    .video-player-container {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        background: #000;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .video-player-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+    .video-card {
+        border: none;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    .video-card:hover {
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3) !important;
+    }
+    .video-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+    }
+    .meta-item {
+        text-align: center;
+        padding: 15px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+        border-radius: 8px;
+    }
+    .meta-item strong {
+        display: block;
+        margin-bottom: 8px;
+        color: #667eea;
+    }
+    .badge-custom {
+        display: inline-block;
+        padding: 8px 16px;
+        margin: 5px;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+    .related-video {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .related-video:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3) !important;
+    }
+    .play-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(102, 126, 234, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .related-video:hover .play-overlay {
+        opacity: 1;
+    }
+    .play-btn {
+        font-size: 48px;
+        color: white;
+    }
+    .certificate-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 12px 24px;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+    .certificate-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+    }
+    .owner-info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        margin: 20px 0;
+    }
+    .owner-name {
+        font-size: 18px;
+        font-weight: 700;
+    }
+    .owner-title {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Main Video Player (8 columns) -->
+        <div class="col-lg-8">
+            <!-- Video Player -->
+            <div class="card shadow-sm mb-4 video-card">
+                <div class="card-body p-0">
+                    <div class="video-player-container">
+                        <iframe 
+                            src="https://www.youtube.com/embed/{{ video.video_id }}?autoplay=0&controls=1&modestbranding=1&rel=0&fs=1&playsinline=1"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                            loading="lazy">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Video Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h1 class="h3 mb-2">{{ video.title }}</h1>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-user"></i> {{ video.channel }}
+                                • <i class="fas fa-calendar"></i> {{ video.added_date|date:"M d, Y" }}
+                            </p>
+                        </div>
+                        {% if video.is_free %}
+                        <span class="badge bg-success">FREE</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-primary">{{ video.category }}</span>
+                        <span class="badge bg-info">{{ video.level|upper }}</span>
+                        <span class="badge bg-secondary">{{ video.language }}</span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5>About this Video</h5>
+                    <p>{{ video.description }}</p>
+                    
+                    <!-- Metadata Grid -->
+                    <div class="video-meta">
+                        <div class="meta-item">
+                            <strong>⏱️ Duration</strong>
+                            {{ video.duration }}
+                        </div>
+                        <div class="meta-item">
+                            <strong>📚 Level</strong>
+                            {{ video.get_level_display }}
+                        </div>
+                        <div class="meta-item">
+                            <strong>🏷️ Category</strong>
+                            {{ video.category }}
+                        </div>
+                        <div class="meta-item">
+                            <strong>🌐 Language</strong>
+                            {{ video.language }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Platform Owner Info -->
+            <div class="owner-info">
+                <div class="owner-name">✨ SkillVerse Platform</div>
+                <div class="owner-title">Founded & Designed by Hiren Patel</div>
+                <small style="margin-top: 10px; display: block; opacity: 0.95;">
+                    🎓 AI-Driven Global Skill Learning & Career Hub
+                </small>
+            </div>
+            
+            <!-- Certificate & Premium Material -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h5 class="mb-0">🎓 Certificate & Premium Materials</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-3">
+                        <strong>✅ Free Access:</strong> All videos, certificates, and materials are completely FREE!
+                    </div>
+                    <p><strong>What You'll Get:</strong></p>
+                    <ul>
+                        <li>📺 Full HD video access</li>
+                        <li>📋 Video transcript</li>
+                        <li>📄 Downloadable notes</li>
+                        <li>🎓 Completion certificate</li>
+                        <li>🌟 Professional materials</li>
+                        <li>💼 Project files</li>
+                    </ul>
+                    <button class="certificate-btn w-100 mt-3" onclick="downloadCertificate()">
+                        <i class="fas fa-download"></i> Download Certificate (When Complete)
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Share Section -->
+            <div class="card shadow-sm mb-4 bg-light">
+                <div class="card-body">
+                    <h5>Share this Video</h5>
+                    <div class="btn-group" role="group">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" 
+                           target="_blank" class="btn btn-outline-primary">
+                            <i class="fab fa-facebook"></i> Facebook
+                        </a>
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}" 
+                           target="_blank" class="btn btn-outline-info">
+                            <i class="fab fa-linkedin"></i> LinkedIn
+                        </a>
+                        <a href="https://wa.me/?text={{ video.title }}%20{{ request.build_absolute_uri }}" 
+                           target="_blank" class="btn btn-outline-success">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </a>
+                        <button class="btn btn-outline-secondary" onclick="copyLink()">
+                            <i class="fas fa-link"></i> Copy Link
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar (4 columns) -->
+        <div class="col-lg-4">
+            <!-- Certificate & Completion Card -->
+            <div class="card shadow-sm mb-4" style="border-top: 4px solid #667eea;">
+                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h5 class="mb-0">🎓 Earn Certificate</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-certificate" style="font-size: 48px; color: #667eea;"></i>
+                    </div>
+                    <p class="mb-3">
+                        <strong>Watch this video completely</strong><br>
+                        <small class="text-muted">Get a professional certificate when done</small>
+                    </p>
+                    <button onclick="completeVideo()" class="btn btn-primary w-100" id="completeBtn">
+                        <i class="fas fa-check-circle"></i> Mark as Complete
+                    </button>
+                    <button class="btn btn-outline-secondary w-100 mt-2" onclick="downloadCertificate()">
+                        <i class="fas fa-download"></i> Download Certificate
+                    </button>
+                    <small class="text-muted d-block mt-2">✅ Certificate will auto-generate when video ends</small>
+                </div>
+            </div>
+            
+            <!-- Video Statistics -->
+            <div class="card shadow-sm mb-4 bg-light">
+                <div class="card-body">
+                    <h6 class="mb-3"><strong>📊 Video Stats</strong></h6>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="p-2" style="background: white; border-radius: 6px; text-align: center;">
+                            <strong>👁️ Views</strong><br>
+                            <span style="color: #667eea; font-weight: 700;">{{ video.views|default:"100K+" }}</span>
+                        </div>
+                        <div class="p-2" style="background: white; border-radius: 6px; text-align: center;">
+                            <strong>⭐ Rating</strong><br>
+                            <span style="color: #667eea; font-weight: 700;">{{ video.rating|default:"4.9★" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Related Videos -->
+            {% if related_videos %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Related Videos</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% for related in related_videos %}
+                    <a href="{% url 'video_player' related.video_id %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex">
+                            <img src="{{ related.thumbnail_url }}" alt="{{ related.title }}" 
+                                 style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 10px;">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">{{ related.title|truncatewords:8 }}</h6>
+                                <small class="text-muted">{{ related.channel }}</small>
+                                <br>
+                                <small class="text-secondary">⏱️ {{ related.duration }}</small>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Certificate Modal -->
+<div class="modal fade" id="certificateModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">🎓 Certificate Ready!</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p>Congratulations! You've completed this video.</p>
+                <p id="certMessage" class="text-success fw-bold"></p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="downloadBtn" class="btn btn-success">Download Certificate</a>
+                <a href="{% url 'user_certificates' %}" class="btn btn-info">View All Certificates</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- YouTube Player -->
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+let player;
+const videoId = '{{ video.video_id }}';
+let videoCompleted = false;
+
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+        videoId: videoId,
+        height: '500',
+        width: '100%',
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    console.log('Player ready');
+}
+
+function onPlayerStateChange(event) {
+    if (event.data == YT.PlayerState.ENDED) {
+        console.log('Video ended');
+        completeVideo();
+    }
+}
+
+function completeVideo() {
+    if (videoCompleted) return;
+    videoCompleted = true;
+    
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch('/api/complete-video/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            video_id: videoId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('certMessage').textContent = 
+                'Certificate #' + data.cert_id + ' generated!';
+            document.getElementById('downloadBtn').href = 
+                `/certificate/${data.cert_id}/download/`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('certificateModal'));
+            modal.show();
+            
+            document.getElementById('completeBtn').disabled = true;
+            document.getElementById('completeBtn').innerHTML = 
+                '<i class="fas fa-check"></i> Completed!';
+        } else {
+            alert('Error: ' + data.msg);
+            videoCompleted = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred');
+        videoCompleted = false;
+    });
+}
+
+function copyLink() {
+    const link = window.location.href;
+    navigator.clipboard.writeText(link).then(() => {
+        alert('Link copied!');
+    });
+}
+
+function downloadCertificate() {
+    if (!videoCompleted) {
+        alert('Please complete the video first to download certificate');
+        return;
+    }
+    // Will be handled by certificate API
+    alert('Certificate download will be available after video completion');
+}
+
+// Dynamic UI enhancements
+document.addEventListener('DOMContentLoaded', function() {
+    // Add smooth scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+    
+    // Animate on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animation = 'fadeInUp 0.6s ease-out';
+            }
+        });
+    });
+    
+    document.querySelectorAll('.card').forEach(el => observer.observe(el));
+});
+</script>
+
+<style>
+    #player {
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .card {
+        border-radius: 8px;
+        border: none;
+    }
+    
+    .btn-group {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .video-card:hover {
+        animation: fadeInUp 0.3s ease-out;
+    }
+</style>
+
+{% csrf_token %}
+{% endblock %}

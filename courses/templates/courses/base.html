@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SkillVerse{% endblock %}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; }
+        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .nav-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: bold; text-decoration: none; color: white; }
+        .nav-menu { display: flex; gap: 20px; list-style: none; align-items: center; }
+        .nav-menu a { color: white; text-decoration: none; padding: 8px 16px; border-radius: 8px; transition: background 0.3s; }
+        .nav-menu a:hover, .nav-menu a.active { background: rgba(255,255,255,0.2); }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-secondary { background: white; color: #667eea; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .footer { background: #2d3748; color: white; text-align: center; padding: 50px 20px; margin-top: 50px; }
+        .messages { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .alert { padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+        .alert-success { background: #d1fae5; color: #065f46; }
+        .alert-error { background: #fee; color: #c53030; }
+    </style>
+    {% block extra_style %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{% url 'home' %}" class="logo">🎓 SkillVerse</a>
+            <ul class="nav-menu">
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'free_videos_library' %}" style="background: rgba(255,255,255,0.3); font-weight: 600;">🎬 Free Videos</a></li>
+                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li><a href="{% url 'courses' %}">Courses</a></li>
+                <li><a href="{% url 'jobs' %}">Jobs</a></li>
+                <li><a href="{% url 'learning_paths' %}">Learning Paths</a></li>
+                <li><a href="{% url 'subscriptions' %}">Subscriptions</a></li>
+                <li><a href="{% url 'profile' %}">Profile</a></li>
+                <li><a href="{% url 'logout' %}">Logout</a></li>
+                {% else %}
+                <li><a href="{% url 'login' %}" style="background: white; color: #667eea; padding: 8px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">Login</a></li>
+                <li><a href="{% url 'register' %}" style="background: white; color: #667eea; padding: 8px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+    <footer class="footer">
+        <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; text-align: left; margin-bottom: 30px;">
+            <div>
+                <h3 style="margin-bottom: 15px; font-size: 24px;">🎓 SkillVerse</h3>
+                <p style="color: #a0aec0; line-height: 1.6;">AI-Driven Global Skill Learning & Career Hub. Empowering learners worldwide with personalized education.</p>
+                <div style="margin-top: 15px; display: flex; gap: 15px; font-size: 24px;">
+                    <a href="#" style="color: white; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">📘</a>
+                    <a href="#" style="color: white; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">🐦</a>
+                    <a href="#" style="color: white; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">💼</a>
+                    <a href="#" style="color: white; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">📷</a>
+                </div>
+            </div>
+            <div>
+                <h4 style="margin-bottom: 15px;">Quick Links</h4>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="{% url 'courses' %}" style="color: #a0aec0; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#a0aec0'">Browse Courses</a>
+                    <a href="{% url 'jobs' %}" style="color: #a0aec0; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#a0aec0'">Find Jobs</a>
+                    <a href="{% url 'learning_paths' %}" style="color: #a0aec0; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#a0aec0'">Learning Paths</a>
+                    <a href="{% url 'subscriptions' %}" style="color: #a0aec0; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#a0aec0'">Pricing</a>
+                </div>
+            </div>
+            <div>
+                <h4 style="margin-bottom: 15px;">Company</h4>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="#" style="color: #a0aec0; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#a0aec0'">About Us</a>
+                    <a href="#" style="color: #a0aec0; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#a0aec0'">Careers</a>
+                    <a href="#" style="color: #a0aec0; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#a0aec0'">Blog</a>
+                    <a href="#" style="color: #a0aec0; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#a0aec0'">Contact</a>
+                </div>
+            </div>
+            <div>
+                <h4 style="margin-bottom: 15px;">Support</h4>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="#" style="color: #a0aec0; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#a0aec0'">Help Center</a>
+                    <a href="#" style="color: #a0aec0; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#a0aec0'">Terms of Service</a>
+                    <a href="#" style="color: #a0aec0; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#a0aec0'">Privacy Policy</a>
+                    <a href="#" style="color: #a0aec0; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#a0aec0'">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+        <div style="border-top: 1px solid #4a5568; padding-top: 20px;">
+            <p>Created by Hiren Patel | © 2024 SkillVerse - AI-Driven Global Skill Learning & Career Hub</p>
+            <p style="color: #a0aec0; margin-top: 10px; font-size: 14px;">🌍 Serving learners in 150+ countries | 🏆 Rated 4.9/5 by 50,000+ students</p>
+        </div>
+    </footer>
+</body>
+</html>

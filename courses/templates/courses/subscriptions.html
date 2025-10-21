@@ -1,0 +1,41 @@
+{% extends 'courses/base.html' %}
+{% load currency_filters %}
+
+{% block title %}Subscriptions - SkillVerse{% endblock %}
+
+{% block extra_style %}
+<style>
+    .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 30px; }
+    .plan-card { background: white; padding: 30px; border-radius: 12px; text-align: center; border: 2px solid #e2e8f0; transition: all 0.3s; }
+    .plan-card:hover { border-color: #667eea; transform: translateY(-5px); }
+    .plan-name { font-size: 24px; font-weight: bold; margin-bottom: 15px; }
+    .plan-price { font-size: 48px; font-weight: bold; color: #667eea; margin-bottom: 10px; }
+    .plan-features { text-align: left; margin: 20px 0; }
+    .plan-features li { padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 style="text-align: center; margin-bottom: 20px;">💳 Choose Your Plan</h1>
+    <p style="text-align: center; color: #718096; margin-bottom: 40px;">Unlock premium features and accelerate your learning</p>
+    
+    <div class="plans-grid">
+        {% for plan in plans %}
+        <div class="plan-card">
+            <div class="plan-name">{{ plan.name }}</div>
+            <div class="plan-price">₹{{ plan.price|usd_to_inr }}</div>
+            <p style="color: #718096;">per {{ plan.duration_days }} days</p>
+            <div class="plan-features">
+                <p style="white-space: pre-line;">{{ plan.features }}</p>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;">Subscribe Now</button>
+        </div>
+        {% empty %}
+        <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #a0aec0;">
+            <h3>No subscription plans available</h3>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

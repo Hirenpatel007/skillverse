@@ -1,0 +1,927 @@
+{% extends 'courses/base.html' %}
+{% load static %}
+
+{% block extra_style %}
+<style>
+    /* Root Variables for Consistent Theming */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --primary-color: #667eea;
+        --secondary-color: #764ba2;
+        --text-dark: #2d3748;
+        --text-light: #718096;
+        --border-radius: 12px;
+        --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.06);
+        --shadow-medium: 0 4px 16px rgba(102, 126, 234, 0.15);
+        --shadow-heavy: 0 8px 32px rgba(102, 126, 234, 0.25);
+    }
+
+    /* Hero Header - Responsive */
+    .hero-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: clamp(15px, 4vw, 30px);
+        border-radius: var(--border-radius);
+        margin-bottom: 20px;
+        box-shadow: var(--shadow-medium);
+        text-align: center;
+    }
+    .hero-title {
+        font-size: clamp(20px, 5vw, 32px);
+        font-weight: 700;
+        margin-bottom: 8px;
+        line-height: 1.2;
+    }
+    .hero-subtitle {
+        font-size: clamp(12px, 3vw, 16px);
+        opacity: 0.95;
+        line-height: 1.4;
+    }
+    
+    /* Filter Card - Enhanced */
+    .filter-card {
+        background: white;
+        padding: clamp(15px, 3vw, 25px);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-light);
+        margin-bottom: 20px;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+    .video-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        height: 100%;
+    }
+    .video-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3);
+    }
+    .video-thumbnail {
+        position: relative;
+        overflow: hidden;
+        height: 200px;
+        background: #000;
+    }
+    .video-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .video-card:hover .video-thumbnail img {
+        transform: scale(1.05);
+    }
+    .play-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(102, 126, 234, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .video-card:hover .play-overlay {
+        opacity: 1;
+    }
+    .play-btn {
+        width: 60px;
+        height: 60px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #667eea;
+    }
+    .video-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+    }
+    .duration-badge {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        z-index: 10;
+    }
+    .video-content {
+        padding: 20px;
+    }
+    .video-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #2d3748;
+        min-height: 45px;
+    }
+    .video-channel {
+        font-size: 14px;
+        color: #718096;
+        margin-bottom: 10px;
+    }
+    .video-description {
+        font-size: 13px;
+        color: #a0aec0;
+        margin-bottom: 12px;
+        min-height: 40px;
+    }
+    .video-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+    .tag {
+        display: inline-block;
+        background: #f0f4ff;
+        color: #667eea;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    .watch-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 14px;
+    }
+    .watch-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Enhanced Search Button Styles */
+    #searchBtn {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%) !important;
+        border: none !important;
+        color: white !important;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem !important;
+        border-radius: 0 var(--border-radius) var(--border-radius) 0 !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        min-width: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    #searchBtn:hover {
+        background: linear-gradient(135deg, #ff5252 0%, #d63031 100%) !important;
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4) !important;
+        color: white !important;
+    }
+
+    #searchBtn:active {
+        transform: translateY(0) scale(0.98);
+    }
+
+    /* Filter Button Enhancement */
+    .btn-primary {
+        background: var(--primary-gradient) !important;
+        border: none !important;
+        border-radius: var(--border-radius) !important;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-light);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium) !important;
+        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+    }
+
+    /* SkillVerse Enhanced Video Card - 2 Column Optimized */
+    .yt-video-card {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 200px;
+        background: white;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        box-shadow: var(--shadow-light);
+        position: relative;
+    }
+
+    .yt-video-card:hover {
+        box-shadow: var(--shadow-heavy);
+        transform: translateY(-8px) scale(1.02);
+        border-color: rgba(102, 126, 234, 0.2);
+    }
+
+    .yt-video-thumbnail {
+        position: relative;
+        width: 100%;
+        height: 0;
+        padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+        overflow: hidden;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    .yt-video-thumbnail img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.2s ease;
+        display: block;
+    }
+
+    .yt-video-card:hover .yt-video-thumbnail img {
+        transform: scale(1.05);
+    }
+
+    .yt-play-overlay {
+        position: absolute;
+        bottom: 4px;
+        right: 4px;
+        z-index: 5;
+        width: 28px;
+        height: 28px;
+        background: rgba(0, 0, 0, 0.8);
+        border-radius: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .yt-video-card:hover .yt-play-overlay {
+        opacity: 1;
+    }
+
+    .yt-play-overlay i {
+        color: white;
+        font-size: 12px;
+        margin-left: 1px;
+    }
+
+    .yt-video-duration {
+        position: absolute;
+        bottom: 4px;
+        right: 4px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 0px 2px;
+        font-size: 9px;
+        font-weight: 600;
+        border-radius: 2px;
+    }
+
+    .yt-video-content {
+        padding: clamp(12px, 2vw, 18px);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 120px;
+    }
+
+    .yt-video-title {
+        font-size: clamp(14px, 2.5vw, 16px);
+        font-weight: 600;
+        color: var(--text-dark);
+        margin: 0 0 10px 0;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        transition: color 0.2s ease;
+        min-height: 40px;
+    }
+
+    .yt-video-card:hover .yt-video-title {
+        color: var(--primary-color);
+    }
+
+    .yt-video-meta {
+        font-size: 10px;
+        color: #606060;
+        margin: 1px 0;
+        line-height: 1.3;
+    }
+
+    .yt-video-channel {
+        font-size: clamp(11px, 2vw, 13px);
+        color: var(--text-light);
+        margin-bottom: 6px;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .yt-video-card:hover .yt-video-channel {
+        color: var(--secondary-color);
+    }
+
+    .yt-video-stats {
+        font-size: clamp(10px, 1.8vw, 12px);
+        color: var(--text-light);
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .yt-stat-item {
+        display: inline-block;
+    }
+
+    .yt-stat-item::after {
+        content: " •";
+        margin-left: 6px;
+    }
+
+    .yt-stat-item:last-child::after {
+        content: "";
+    }
+
+    .yt-video-card-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .yt-video-tags {
+        display: flex;
+        gap: 4px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+    }
+
+    .yt-video-tag {
+        display: inline-block;
+        background: #f0f0f0;
+        color: #030303;
+        padding: 2px 8px;
+        border-radius: 2px;
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    .yt-watch-link {
+        display: inline-block;
+        width: 100%;
+        padding: 8px 0;
+        background: transparent;
+        color: #0066cc;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .yt-watch-link:hover {
+        color: #0052a3;
+        text-decoration: underline;
+    }
+    
+    /* Enhanced Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    /* SkillVerse Responsive Enhancements */
+    @media (max-width: 768px) {
+        .hero-header {
+            margin-bottom: 15px;
+        }
+        .filter-card {
+            padding: 15px;
+        }
+        .yt-video-card {
+            min-height: 180px;
+        }
+        .row.g-3 {
+            --bs-gutter-x: 1rem;
+            --bs-gutter-y: 1rem;
+        }
+        /* Stack to single column on mobile */
+        .col-lg-6 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .hero-title {
+            font-size: 18px;
+        }
+        .hero-subtitle {
+            font-size: 12px;
+        }
+        .yt-video-content {
+            padding: 12px;
+        }
+    }
+
+    /* SkillVerse Branding Enhancements */
+    .skillverse-badge {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    /* 2-Column Layout Optimization */
+    @media (min-width: 992px) {
+        .col-lg-6 {
+            flex: 0 0 50%;
+            max-width: 50%;
+        }
+    }
+    .stats-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    .stats-box strong {
+        font-size: 18px;
+    }
+    .no-videos {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    .no-videos-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Hero Header -->
+    <div class="hero-header">
+        <div class="hero-title">🎓 SkillVerse - Free Coding Video Library</div>
+        <div class="hero-subtitle">Learn Programming with SkillVerse • 136+ hours of FREE tutorials • 29+ videos • 100% No Subscriptions Required</div>
+        <div style="margin-top: 10px; font-size: 14px; opacity: 0.9;">
+            <i class="fas fa-graduation-cap"></i> Your Complete Learning Platform
+        </div>
+    </div>
+
+    <!-- Search & Filter Section - CENTERED -->
+    <div class="filter-card">
+        <form method="GET" id="filterForm">
+            <!-- Centered Search Bar -->
+            <div class="row justify-content-center mb-4">
+                <div class="col-lg-8 col-md-10">
+                    <label class="form-label text-center w-100"><strong>🔍 Search Videos</strong></label>
+                    <div class="input-group input-group-lg">
+                        <select id="searchScope" class="form-select" aria-label="Search scope" style="max-width: 120px; border-radius: var(--border-radius) 0 0 var(--border-radius);">
+                            <option value="site" selected>📚 Site</option>
+                            <option value="youtube">🎥 YouTube</option>
+                            <option value="google">🌐 Google</option>
+                        </select>
+                        <input type="text" id="searchInput" name="search" class="form-control" 
+                               placeholder="Search by title, channel..." value="{{ search_term }}" aria-label="Search input"
+                               style="border-left: none; border-right: none;">
+                        <button type="submit" id="searchBtn" class="btn btn-primary" title="Search">
+                            <i class="fas fa-search"></i>
+                            <span class="d-none d-sm-inline ms-1">Search</span>
+                        </button>
+                    </div>
+                    <small class="form-text text-muted text-center d-block mt-2">🎯 Choose search scope: internal site, YouTube, or Google</small>
+                </div>
+            </div>
+            
+            <!-- Centered Filters -->
+            <div class="row justify-content-center g-3">
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <label class="form-label"><strong>🏷️ Category</strong></label>
+                    <select name="category" class="form-select form-select-lg" style="border-radius: var(--border-radius);">
+                        <option value="">🎯 All Categories</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat }}" {% if cat == active_category %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <label class="form-label"><strong>📊 Level</strong></label>
+                    <select name="level" class="form-select form-select-lg" style="border-radius: var(--border-radius);">
+                        <option value="">📈 All Levels</option>
+                        {% for level_code, level_name in levels %}
+                            <option value="{{ level_code }}" {% if level_code == active_level %}selected{% endif %}>{{ level_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-lg-2 col-md-4 col-sm-12 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary btn-lg w-100" style="min-height: 48px;">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+            </div>
+        </form>
+        
+        <!-- Upload & Sharing Links -->
+        <div class="text-center mt-4">
+            <a href="{% url 'upload_resource' %}" class="btn btn-success me-2">
+                <i class="fas fa-upload"></i> Upload Resource
+            </a>
+            <a href="{% url 'sharing_platform' %}" class="btn btn-info">
+                <i class="fas fa-share-alt"></i> Sharing Platform
+            </a>
+        </div>
+    </div>
+
+    <!-- SkillVerse Results Summary -->
+    <div class="stats-box">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <strong>🎓 SkillVerse Library:</strong> {{ videos.count|default:"29" }} videos found • 
+                <strong>⏱️ Total Time:</strong> {{ total_hours|default:"136" }}+ hours
+            </div>
+            <div style="font-size: 14px; opacity: 0.9;">
+                <i class="fas fa-graduation-cap"></i> Learn with SkillVerse
+            </div>
+        </div>
+    </div>
+
+    <!-- SkillVerse Videos Grid - 2 Column Layout -->
+    <div class="row g-3 g-md-4" id="videosGrid" style="margin-bottom: 40px;">
+        {% if videos %}
+            {% for video in videos %}
+            <div class="col-lg-6 col-md-6 col-sm-12 col-12 video-item" style="animation: fadeInUp {{ forloop.counter|add:"0.1"|floatformat:1 }}s ease-out forwards;">
+                <a href="{% url 'video_player' video.video_id %}" class="yt-video-card-link" style="text-decoration: none; color: inherit;">
+                    <div class="yt-video-card">
+                        <!-- YouTube-Style Rectangular Thumbnail (16:9) -->
+                        <div class="yt-video-thumbnail">
+                            <img src="{{ video.thumbnail_url|default:'https://via.placeholder.com/480x270/667eea/ffffff?text=SkillVerse+Video' }}" alt="{{ video.title|default:'SkillVerse Programming Tutorial' }}" loading="lazy">
+                            
+                            <!-- Enhanced Duration Badge -->
+                            <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0, 0, 0, 0.85); color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; backdrop-filter: blur(4px);">
+                                {{ video.duration|default:"10:00" }}
+                            </div>
+                            
+                            <!-- SkillVerse Badge -->
+                            <div style="position: absolute; top: 8px; left: 8px; background: var(--primary-gradient); color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; backdrop-filter: blur(4px);">
+                                <i class="fas fa-graduation-cap" style="margin-right: 2px;"></i>
+                                SkillVerse
+                            </div>
+                            
+                            <!-- Enhanced Play Button Overlay -->
+                            <div class="yt-play-overlay" style="background: rgba(102, 126, 234, 0.9); backdrop-filter: blur(2px);">
+                                <div style="width: 50px; height: 50px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); transition: transform 0.2s ease;">
+                                    <i class="fas fa-play" style="font-size: 18px; color: var(--primary-color); margin-left: 3px;"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- SkillVerse Video Content Section -->
+                        <div class="yt-video-content">
+                            <!-- Title with fallback -->
+                            <h6 class="yt-video-title">{{ video.title|default:"SkillVerse Programming Tutorial" }}</h6>
+                            
+                            <!-- Channel Name with SkillVerse branding -->
+                            <div class="yt-video-channel">
+                                <i class="fas fa-graduation-cap" style="margin-right: 4px; color: var(--primary-color);"></i>
+                                {{ video.channel|default:"SkillVerse" }}
+                            </div>
+                            
+                            <!-- Enhanced Stats with Icons -->
+                            <div class="yt-video-stats">
+                                <span class="yt-stat-item">
+                                    <i class="fas fa-tag" style="font-size: 10px; margin-right: 4px;"></i>
+                                    {{ video.category|default:"Programming"|truncatewords:1 }}
+                                </span>
+                                {% if video.level %}
+                                <span class="yt-stat-item">
+                                    <i class="fas fa-signal" style="font-size: 10px; margin-right: 4px;"></i>
+                                    {{ video.level|upper }}
+                                </span>
+                                {% else %}
+                                <span class="yt-stat-item">
+                                    <i class="fas fa-signal" style="font-size: 10px; margin-right: 4px;"></i>
+                                    BEGINNER
+                                </span>
+                                {% endif %}
+                                <span class="yt-stat-item">
+                                    <i class="fas fa-play-circle" style="font-size: 10px; margin-right: 4px;"></i>
+                                    SkillVerse
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-lg-12">
+                <div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%); border-radius: 12px; border: 2px dashed #cbd5e0;">
+                    <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.6;">🎓</div>
+                    <h5 style="color: #2d3748; margin-bottom: 10px; font-weight: 700;">No Videos Found in SkillVerse Library</h5>
+                    <p style="color: #718096; margin-bottom: 20px;">Try adjusting your search filters or browse all available SkillVerse videos</p>
+                    <a href="{% url 'free_videos_library' %}" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 10px 30px; font-weight: 600;">
+                        <i class="fas fa-redo"></i> Browse All SkillVerse Videos
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Enhanced Video Card Interactions -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enhanced video card hover effects
+            const videoCards = document.querySelectorAll('.yt-video-card');
+            videoCards.forEach((card, index) => {
+                const overlay = card.querySelector('.yt-play-overlay');
+                const img = card.querySelector('img');
+                const playBtn = card.querySelector('.yt-play-overlay > div');
+                
+                // Staggered animation delay
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                card.addEventListener('mouseenter', function() {
+                    if (overlay) {
+                        overlay.style.opacity = '1';
+                        overlay.style.visibility = 'visible';
+                    }
+                    if (img) img.style.transform = 'scale(1.1)';
+                    if (playBtn) playBtn.style.transform = 'scale(1.1)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    if (overlay) {
+                        overlay.style.opacity = '0';
+                        overlay.style.visibility = 'hidden';
+                    }
+                    if (img) img.style.transform = 'scale(1)';
+                    if (playBtn) playBtn.style.transform = 'scale(1)';
+                });
+            });
+
+            // Enhanced search input focus effects
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('focus', function() {
+                    this.parentElement.style.boxShadow = '0 0 0 3px rgba(255, 107, 107, 0.2)';
+                    this.parentElement.style.borderColor = '#ff6b6b';
+                });
+                
+                searchInput.addEventListener('blur', function() {
+                    this.parentElement.style.boxShadow = 'none';
+                    this.parentElement.style.borderColor = '#dee2e6';
+                });
+            }
+
+            // Loading animation for search
+            const searchBtn = document.getElementById('searchBtn');
+            const filterForm = document.getElementById('filterForm');
+            if (searchBtn && filterForm) {
+                filterForm.addEventListener('submit', function() {
+                    const scope = document.getElementById('searchScope').value;
+                    if (scope === 'site') {
+                        searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span class="d-none d-sm-inline ms-1">Searching...</span>';
+                        searchBtn.disabled = true;
+                    }
+                });
+            }
+        });
+    </script>
+</div>
+
+<!-- Additional Enhanced Styles -->
+<style>
+    /* Loading States */
+    .loading {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+    
+    /* Enhanced Form Controls */
+    .form-select:focus,
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    /* Improved Stats Box */
+    .stats-box {
+        background: var(--primary-gradient);
+        color: white;
+        padding: clamp(15px, 3vw, 20px);
+        border-radius: var(--border-radius);
+        margin-bottom: 25px;
+        box-shadow: var(--shadow-medium);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stats-box strong {
+        font-size: clamp(16px, 3vw, 20px);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Enhanced Play Overlay */
+    .yt-play-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 10;
+    }
+    
+    /* Smooth Scrolling */
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    /* Focus Indicators for Accessibility */
+    .yt-video-card:focus-within {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+    }
+    
+    /* Print Styles */
+    @media print {
+        .filter-card,
+        .hero-header {
+            background: white !important;
+            color: black !important;
+        }
+    }
+</style>
+
+<!-- Performance and UX Enhancements -->
+<script>
+// Lazy loading for better performance
+if ('IntersectionObserver' in window) {
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src || img.src;
+                img.classList.remove('lazy');
+                observer.unobserve(img);
+            }
+        });
+    });
+
+    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+        imageObserver.observe(img);
+    });
+}
+
+// Smooth scroll to top
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Add scroll to top button if page is long
+if (document.body.scrollHeight > window.innerHeight * 2) {
+    const scrollBtn = document.createElement('button');
+    scrollBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+    scrollBtn.className = 'btn btn-primary';
+    scrollBtn.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        background: var(--primary-gradient);
+        border: none;
+        box-shadow: var(--shadow-medium);
+    `;
+    scrollBtn.onclick = scrollToTop;
+    document.body.appendChild(scrollBtn);
+
+    window.addEventListener('scroll', () => {
+        scrollBtn.style.opacity = window.pageYOffset > 300 ? '1' : '0';
+    });
+}
+</script>
+
+<!-- Enhanced Search Scope Handler -->
+<script>
+(function() {
+    const searchForm = document.getElementById('filterForm');
+    const searchScope = document.getElementById('searchScope');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+
+    if (!searchForm || !searchScope || !searchInput) return;
+
+    function updatePlaceholder() {
+        const scope = searchScope.value;
+        const placeholders = {
+            'site': 'Search videos by title, channel, category...',
+            'youtube': 'Search YouTube (e.g. "React Tutorial")',
+            'google': 'Search Google (e.g. "Python Machine Learning")'
+        };
+        
+        searchInput.placeholder = placeholders[scope] || placeholders.site;
+        
+        // Update button color based on scope
+        if (searchBtn) {
+            const buttonStyles = {
+                'site': 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
+                'youtube': 'linear-gradient(135deg, #ff0000 0%, #cc0000 100%)',
+                'google': 'linear-gradient(135deg, #4285f4 0%, #1a73e8 100%)'
+            };
+            searchBtn.style.background = buttonStyles[scope] || buttonStyles.site;
+        }
+    }
+
+    // Initialize
+    updatePlaceholder();
+
+    // Update on scope change
+    searchScope.addEventListener('change', updatePlaceholder);
+
+    // Enhanced form submission
+    searchForm.addEventListener('submit', function(e) {
+        const scope = searchScope.value;
+        const query = (searchInput.value || '').trim();
+        
+        if (!query && scope !== 'site') {
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.style.borderColor = '#ff6b6b';
+            setTimeout(() => {
+                searchInput.style.borderColor = '';
+            }, 2000);
+            return;
+        }
+
+        if (scope === 'youtube') {
+            e.preventDefault();
+            const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query + ' programming tutorial')}`;
+            window.open(url, '_blank', 'noopener,noreferrer');
+        } else if (scope === 'google') {
+            e.preventDefault();
+            const url = `https://www.google.com/search?q=${encodeURIComponent(query + ' programming tutorial')}`;
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+        }
+    });
+})();
+</script>
+
+{% endblock %}

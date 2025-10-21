@@ -1,0 +1,68 @@
+{% extends 'courses/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <h1><i class="fas fa-folder-open"></i> My Uploads</h1>
+        <p class="text-muted">Manage your shared resources</p>
+    </div>
+    
+    <div class="text-center mb-4">
+        <a href="{% url 'upload_resource' %}" class="btn btn-success btn-lg">
+            <i class="fas fa-upload"></i> Upload New Resource
+        </a>
+        <a href="{% url 'sharing_platform' %}" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-share-alt"></i> Browse All Resources
+        </a>
+    </div>
+    
+    <div class="row g-4">
+        {% for upload in uploads %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="badge bg-primary">{{ upload.get_file_type_display }}</span>
+                        <span class="badge {% if upload.is_public %}bg-success{% else %}bg-secondary{% endif %}">
+                            {% if upload.is_public %}Public{% else %}Private{% endif %}
+                        </span>
+                    </div>
+                    
+                    <h5 class="card-title">{{ upload.title }}</h5>
+                    <p class="card-text text-muted small">{{ upload.description|truncatewords:20 }}</p>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar"></i> {{ upload.uploaded_at|date:"M d, Y" }}<br>
+                            <i class="fas fa-download"></i> {{ upload.downloads }} downloads
+                            {% if upload.category %}
+                            <br><i class="fas fa-tag"></i> {{ upload.category }}
+                            {% endif %}
+                        </small>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'download_resource' upload.pk %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                        <a href="{% url 'delete_upload' upload.pk %}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this resource?')">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-inbox" style="font-size: 64px; color: #ccc;"></i>
+            <h4 class="mt-3">No uploads yet</h4>
+            <p class="text-muted">Start sharing your resources with the community!</p>
+            <a href="{% url 'upload_resource' %}" class="btn btn-success btn-lg">
+                <i class="fas fa-upload"></i> Upload Your First Resource
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

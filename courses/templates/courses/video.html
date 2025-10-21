@@ -1,0 +1,196 @@
+{% extends 'courses/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <h1 class="mb-4">{{ course_title }}</h1>
+            
+            <!-- YouTube Video Player -->
+            <div id="player" style="width: 100%; height: 500px; background: black;"></div>
+            
+            <div class="mt-4">
+                <h3>{{ course_title }}</h3>
+                <p>{{ course_description }}</p>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5>Video Info</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Duration:</strong> {{ duration }}</p>
+                    <p><strong>Instructor:</strong> {{ instructor }}</p>
+                    <p><strong>Category:</strong> {{ category }}</p>
+                    <div id="completion-status">
+                        <p class="text-muted">Complete the video to earn a certificate</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Certificate Modal -->
+<div class="modal fade" id="certificateModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">🎓 Certificate Ready!</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p>Congratulations! You've completed the video.</p>
+                <p>Your certificate has been generated.</p>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="downloadBtn" class="btn btn-success">Download Certificate</a>
+                <a href="{% url 'user_certificates' %}" class="btn btn-info">View All Certificates</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="toastNotification" class="toast hide" role="alert">
+        <div class="toast-header bg-info text-white">
+            <strong class="me-auto">Skillverse</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body">
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+</div>
+
+{% csrf_token %}
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+let player;
+const videoId = '{{ video_id }}';  // Pass from Django view
+let videoCompleted = false;
+
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+        videoId: videoId,
+        height: '500',
+        width: '100%',
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange,
+            'onError': onPlayerError
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    console.log('Video player ready');
+}
+
+function onPlayerStateChange(event) {
+    // YT.PlayerState.ENDED = 0
+    // YT.PlayerState.PLAYING = 1
+    // YT.PlayerState.PAUSED = 2
+    // YT.PlayerState.BUFFERING = 3
+    // YT.PlayerState.CUED = 5
+    
+    if (event.data == YT.PlayerState.ENDED) {
+        console.log('Video completed!');
+        completeVideo();
+    }
+}
+
+function onPlayerError(event) {
+    console.error('YouTube player error:', event.data);
+    showToast('Error loading video. Please try again.', 'danger');
+}
+
+function completeVideo() {
+    if (videoCompleted) return; // Prevent duplicate submissions
+    videoCompleted = true;
+    
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch('/api/complete-video/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            video_id: videoId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('✅ Certificate generated successfully!', 'success');
+            const certId = data.cert_id;
+            
+            // Update download button
+            document.getElementById('downloadBtn').href = `/certificate/${certId}/download/`;
+            
+            // Show certificate modal
+            const modal = new bootstrap.Modal(document.getElementById('certificateModal'));
+            modal.show();
+            
+            // Update completion status
+            document.getElementById('completion-status').innerHTML = `
+                <div class="alert alert-success">
+                    <strong>✅ Completed!</strong> Your certificate is ready.
+                </div>
+            `;
+        } else {
+            showToast('Error: ' + data.msg, 'danger');
+            videoCompleted = false; // Allow retry
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('An error occurred. Please try again.', 'danger');
+        videoCompleted = false; // Allow retry
+    });
+}
+
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toastNotification');
+    const toastMessage = document.getElementById('toastMessage');
+    
+    toastMessage.textContent = message;
+    toast.className = `toast show alert alert-${type}`;
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        toast.classList.add('hide');
+    }, 5000);
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page loaded, video ID:', videoId);
+});
+</script>
+
+<style>
+    .hide {
+        display: none !important;
+    }
+    
+    #player {
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .card {
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}

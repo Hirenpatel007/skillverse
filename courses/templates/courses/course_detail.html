@@ -1,0 +1,57 @@
+{% extends 'courses/base.html' %}
+{% load currency_filters %}
+
+{% block title %}{{ course.title }} - SkillVerse{% endblock %}
+
+{% block extra_style %}
+<style>
+    .course-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 60px 20px; }
+    .course-content { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-top: 30px; }
+    .main-content { background: white; padding: 30px; border-radius: 12px; }
+    .sidebar { background: white; padding: 30px; border-radius: 12px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="course-header">
+    <div class="container">
+        <h1>{{ course.title }}</h1>
+        <p>{{ course.instructor }}</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="course-content">
+        <div class="main-content">
+            <h2>About This Course</h2>
+            <p>{{ course.description }}</p>
+            
+            <h3 style="margin-top: 30px;">Course Details</h3>
+            <p><strong>Category:</strong> {{ course.category }}</p>
+            <p><strong>Duration:</strong> {{ course.duration|default:"Self-paced" }}</p>
+            <p><strong>Rating:</strong> ⭐ {{ course.rating }}/5</p>
+            <p><strong>Source:</strong> {{ course.get_source_display }}</p>
+        </div>
+        
+        <div class="sidebar">
+            <h3>Price</h3>
+            <p style="font-size: 36px; color: #667eea; font-weight: bold;">₹{{ course.price|usd_to_inr }}</p>
+            
+            {% if enrolled %}
+            <button class="btn btn-primary" style="width: 100%;" disabled>Already Enrolled</button>
+            {% else %}
+            <a href="{% url 'enroll_course' course.pk %}" class="btn btn-primary" style="width: 100%; text-align: center;">Enroll Now</a>
+            {% endif %}
+            
+            <div style="margin-top: 30px;">
+                <h4>What You'll Learn</h4>
+                <ul style="margin-top: 15px; color: #718096;">
+                    <li>Master key concepts</li>
+                    <li>Build practical projects</li>
+                    <li>Get certified</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
