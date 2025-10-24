@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: skillverse
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn skillverse.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: skillverse_db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+
+databases:
+  - name: skillverse_db
+    databaseName: skillverse
+    user: skillverse
